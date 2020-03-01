@@ -460,7 +460,7 @@ void UExtCharacterMovementComponent::OnMovementUpdated(float DeltaSeconds, const
 
 	check(ExtCharacterOwner);
 
-#if WITH_EDITOR
+#if WITH_EDITORONLY_DATA
 	// Square roots for PIE
 	InEditorSpeed = Velocity.Size();
 	InEditorGroundSpeed = Velocity.Size2D();

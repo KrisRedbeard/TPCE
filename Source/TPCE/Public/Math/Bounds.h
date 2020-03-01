@@ -24,9 +24,9 @@ struct TPCE_API FBounds
 
 public:
 
-	FORCEINLINE FBounds();
-	FORCEINLINE FBounds(float InMin, float InUpperBound);
-	FORCEINLINE FBounds(const FBounds& Other);
+	FBounds();
+	FBounds(float InMin, float InUpperBound);
+	FBounds(const FBounds& Other);
 
 	FORCEINLINE explicit FBounds(const FVector2D& Other);
 

@@ -216,7 +216,7 @@ public: // Bitfields
 
 private: // Variables
 
-#if WITH_EDITOR
+#if WITH_EDITORONLY_DATA
 
 	/** Current Speed */
 	UPROPERTY(VisibleInstanceOnly, Transient, DuplicateTransient, Category = Velocity, meta=(DisplayName="Speed"))

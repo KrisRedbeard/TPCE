@@ -104,7 +104,10 @@ void FTPCEEditor::ShutdownModule()
 	}
 	else 
 	{
+//Error due to GUnrealEd being NULL causes packaging failure
+#if !UE_BUILD_SHIPPING && !UE_BUILD_DEVELOPMENT
 		UE_LOG(LogTPCEEditor, Error, TEXT("Cannot unregister component visualizers: GUnrealEd is null."));
+#endif
 	}
 
 	UnregisterAssetTools();
@@ -174,7 +177,10 @@ void FTPCEEditor::RegisterComponentVisualizer(const FName ComponentClassName, TS
 	}
 	else
 	{
+//Error due to GUnrealEd being NULL causes packaging failure
+#if !UE_BUILD_SHIPPING && !UE_BUILD_DEVELOPMENT
 		UE_LOG(LogTPCEEditor, Error, TEXT("Cannot register component visualizers: GUnrealEd is null."));
+#endif
 	}
 
 	RegisteredComponentClassNames.Add(ComponentClassName);
