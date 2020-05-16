@@ -405,12 +405,22 @@ void AExtCharacter::PreReplication(IRepChangedPropertyTracker & ChangedPropertyT
 	// Workaround:: Skip original ReplicatedMovement if the custom tailored one can be used.
 	if (IsReplicatingMovement() || GetAttachmentReplication().AttachParent)
 	{
+
+
+
 		if (GatherExtMovement())
 		{
 			DOREPLIFETIME_ACTIVE_OVERRIDE(AExtCharacter, ReplicatedExtMovement, IsReplicatingMovement());
-			PRAGMA_DISABLE_DEPRECATION_WARNINGS
+			{
+				/* UE4.25 Replicated Movement is private we need a workaround
+				PRAGMA_DISABLE_DEPRECATION_WARNINGS
 				DOREPLIFETIME_ACTIVE_OVERRIDE(AActor, ReplicatedMovement, false);
-			PRAGMA_ENABLE_DEPRECATION_WARNINGS
+				PRAGMA_ENABLE_DEPRECATION_WARNINGS
+				*/
+				static const FName ReplicatedMovementPropertyName(TEXT("ReplicatedMovement"));
+				static UProperty* ReplicatedMovementProperty = GetReplicatedProperty(StaticClass(),ACharacter::StaticClass(),ReplicatedMovementPropertyName);
+				ChangedPropertyTracker.SetCustomIsActiveOverride(this,ReplicatedMovementProperty->RepIndex,false);
+			}
 		}
 		else
 		{
@@ -421,9 +431,17 @@ void AExtCharacter::PreReplication(IRepChangedPropertyTracker & ChangedPropertyT
 	else
 	{
 		DOREPLIFETIME_ACTIVE_OVERRIDE(AExtCharacter, ReplicatedExtMovement, false);
-		PRAGMA_DISABLE_DEPRECATION_WARNINGS
+
+		{
+			/* UE4.25 Replicated Movement is private we need a workaround
+			PRAGMA_DISABLE_DEPRECATION_WARNINGS
 			DOREPLIFETIME_ACTIVE_OVERRIDE(AActor, ReplicatedMovement, false);
-		PRAGMA_ENABLE_DEPRECATION_WARNINGS
+			PRAGMA_ENABLE_DEPRECATION_WARNINGS
+			*/
+			static const FName ReplicatedMovementPropertyName(TEXT("ReplicatedMovement"));
+			static UProperty* ReplicatedMovementProperty = GetReplicatedProperty(StaticClass(), ACharacter::StaticClass(), ReplicatedMovementPropertyName);
+			ChangedPropertyTracker.SetCustomIsActiveOverride(this,ReplicatedMovementProperty->RepIndex, false);
+		}
 	}
 
 	// Workaround: Disable replication of ReplicatedMovementMode since we have a custom movement mode replication that includes jump state info.
@@ -432,7 +450,7 @@ void AExtCharacter::PreReplication(IRepChangedPropertyTracker & ChangedPropertyT
 	{
 		static const FName ReplicatedMovementModePropertyName(TEXT("ReplicatedMovementMode"));
 		static UProperty* ReplicatedMovementModeProperty = GetReplicatedProperty(StaticClass(), ACharacter::StaticClass(), ReplicatedMovementModePropertyName);
-		ChangedPropertyTracker.SetCustomIsActiveOverride(ReplicatedMovementModeProperty->RepIndex, false);
+		ChangedPropertyTracker.SetCustomIsActiveOverride(this,ReplicatedMovementModeProperty->RepIndex, false);
 	}
 
 	// Workaround: RemoteViewPitch is taken from ReplicatedLook.Rotation.Pitch
