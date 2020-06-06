@@ -32,7 +32,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRagdollChangedSignature, AExtCharac
 // ---------------------------------
 // TODO: Comment all methods with All/Local/Server to indicate where they are expected to be called
 // TODO: Add missing comments/tooltips to members
-// TODO: Try to improve the movement blend with a walk-in-place animation for gait scale 0. This should reduce leg crossing. 
+// TODO: Try to improve the movement blend with a walk-in-place animation for gait scale 0. This should reduce leg crossing.
 // TODO: Idle Breaks
 // TODO: Female animations
 // TODO: Better crouch animations
@@ -118,10 +118,10 @@ struct FCharacterMovementSettings
 
 /**
  * An extended Character that can Walk, Run, Sprint, Crouch, Jump, Perform a generic action and turn into a Ragdoll.
- * The default gait is Run. 
+ * The default gait is Run.
  *
  * Characters of this class can assume one of two attitudes with distinct movement settings. Normally the character will be in its Primary attitude.
- * When the generic action is activated it then assumes the Secondary attitude. 
+ * When the generic action is activated it then assumes the Secondary attitude.
  *
  * Neither Crouch, Jump nor the generic action can be performed while the character is Sprinting.
  *
@@ -158,7 +158,7 @@ struct FCharacterMovementSettings
  * This means no camera component or camera dependent properties. Anything camera related should be implemented by derived classes.
  *
  * NOTE: We don't cache the "last hit" in CharacterMovement, and there maybe multiple hits per simulation step, but there are a variety of ways
- * to get notifications for such events (called in this order). 
+ * to get notifications for such events (called in this order).
  *     - virtual AActor::NotifyHit()
  *     - (Actor Blueprint Event) EventHit (called by NotifyHit())
  *     - virtual UCharacterMovementComponent::HandleImpact()
@@ -174,7 +174,7 @@ class TPCE_API AExtCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	
+
 	AExtCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 protected:	// Bitfields
@@ -432,7 +432,7 @@ private:	// Methods
 	 * @see OnLandingComplete()
 	 */
 	void LandingTimer_OnTime();
-	
+
 
 	/**
 	* Callback for the GettingUpTimer. Calls OnGettingUpComplete() without the risk of being overriden by derived classes.
@@ -671,7 +671,7 @@ public:		// Methods
 	virtual void PostNetReceive() override;
 
 #if WITH_EDITOR
-	virtual bool CanEditChange(const UProperty* InProperty) const override;
+	virtual bool CanEditChange(const FProperty* InProperty) const override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& e) override;
 #endif
 
@@ -713,7 +713,7 @@ public:		// Methods
 	virtual void OnJumped_Implementation();
 
 
-	/** 
+	/**
 	 * @return true if this character is currently able to crouch (and is not currently crouched). This method was made final for consistency.
 	 * @see CanCrouchInternal()
 	 */
