@@ -24,7 +24,8 @@ public class TPCE: ModuleRules
 				"Engine",
 				"AnimationCore",
 				"AnimGraphRuntime",
-				"InputCore"
+				"InputCore",
+				"AIModule"
 			}
 		);
 

@@ -21,7 +21,7 @@ UActorWidgetComponent::UActorWidgetComponent()
 
 #if WITH_EDITOR
 
-bool UActorWidgetComponent::CanEditChange(const UProperty* InProperty) const
+bool UActorWidgetComponent::CanEditChange(const FProperty* InProperty) const
 {
 	bool bCanChange = Super::CanEditChange(InProperty);
 
@@ -54,7 +54,7 @@ void UActorWidgetComponent::PostEditChangeProperty(struct FPropertyChangedEvent&
 				OnVisibilityChanged();
 	}
 
-	// Note: Any changes must be made before UActorComponent::PostEditChangeChainProperty is called because components will be reset when UActorComponent reruns construction scripts 
+	// Note: Any changes must be made before UActorComponent::PostEditChangeChainProperty is called because components will be reset when UActorComponent reruns construction scripts
 	Super::PostEditChangeProperty(e);
 }
 #endif

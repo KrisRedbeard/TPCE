@@ -14,6 +14,8 @@ DECLARE_CYCLE_STAT(TEXT("SpeedWarping Eval"), STAT_SpeedWarping_Eval, STATGROUP_
 FAnimNode_SpeedWarping::FAnimNode_SpeedWarping()
 	: Space(EBoneControlSpace::BCS_BoneSpace)
 	, Direction(FVector::RightVector)
+	, SpeedScaling(1.0f)
+	, PelvisOffset(FVector::ZeroVector)
 	, PelvisInterpSpeed(10.f)
 	, PelvisAdjustmentAlpha(1.0f)
 	, bClampIKUsingFKLeg(true)

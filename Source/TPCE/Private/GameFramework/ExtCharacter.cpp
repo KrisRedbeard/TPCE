@@ -243,7 +243,7 @@ AExtCharacter::AExtCharacter(const FObjectInitializer& ObjectInitializer)
 	ExtCharacterMovement->ResetExtraMoveState();
 
 	ExtCharacterMovement->bUseVelocityAsMovementVector = true;
-	
+
 	ExtCharacterMovement->CrouchedHalfHeight = 60.0f;
 	ExtCharacterMovement->SetWalkableFloorAngle(50.0f);
 
@@ -370,7 +370,7 @@ AExtCharacter::AExtCharacter(const FObjectInitializer& ObjectInitializer)
 	ExtCharacterMovement->NetworkSimulatedSmoothRotationTime = 0.05f;
 	ExtCharacterMovement->ListenServerNetworkSimulatedSmoothRotationTime = 0.05f;
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
+	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character)
 	// must be set in the derived blueprint assets to avoid direct content references in C++.
 }
 
@@ -405,12 +405,22 @@ void AExtCharacter::PreReplication(IRepChangedPropertyTracker & ChangedPropertyT
 	// Workaround:: Skip original ReplicatedMovement if the custom tailored one can be used.
 	if (IsReplicatingMovement() || GetAttachmentReplication().AttachParent)
 	{
+
+
+
 		if (GatherExtMovement())
 		{
 			DOREPLIFETIME_ACTIVE_OVERRIDE(AExtCharacter, ReplicatedExtMovement, IsReplicatingMovement());
-			PRAGMA_DISABLE_DEPRECATION_WARNINGS
+			{
+				/* UE4.25 Replicated Movement is private we need a workaround
+				PRAGMA_DISABLE_DEPRECATION_WARNINGS
 				DOREPLIFETIME_ACTIVE_OVERRIDE(AActor, ReplicatedMovement, false);
-			PRAGMA_ENABLE_DEPRECATION_WARNINGS
+				PRAGMA_ENABLE_DEPRECATION_WARNINGS
+				*/
+				static const FName ReplicatedMovementPropertyName(TEXT("ReplicatedMovement"));
+				static UProperty* ReplicatedMovementProperty = GetReplicatedProperty(StaticClass(),ACharacter::StaticClass(),ReplicatedMovementPropertyName);
+				ChangedPropertyTracker.SetCustomIsActiveOverride(this,ReplicatedMovementProperty->RepIndex,false);
+			}
 		}
 		else
 		{
@@ -421,18 +431,26 @@ void AExtCharacter::PreReplication(IRepChangedPropertyTracker & ChangedPropertyT
 	else
 	{
 		DOREPLIFETIME_ACTIVE_OVERRIDE(AExtCharacter, ReplicatedExtMovement, false);
-		PRAGMA_DISABLE_DEPRECATION_WARNINGS
+
+		{
+			/* UE4.25 Replicated Movement is private we need a workaround
+			PRAGMA_DISABLE_DEPRECATION_WARNINGS
 			DOREPLIFETIME_ACTIVE_OVERRIDE(AActor, ReplicatedMovement, false);
-		PRAGMA_ENABLE_DEPRECATION_WARNINGS
+			PRAGMA_ENABLE_DEPRECATION_WARNINGS
+			*/
+			static const FName ReplicatedMovementPropertyName(TEXT("ReplicatedMovement"));
+			static UProperty* ReplicatedMovementProperty = GetReplicatedProperty(StaticClass(), ACharacter::StaticClass(), ReplicatedMovementPropertyName);
+			ChangedPropertyTracker.SetCustomIsActiveOverride(this,ReplicatedMovementProperty->RepIndex, false);
+		}
 	}
 
 	// Workaround: Disable replication of ReplicatedMovementMode since we have a custom movement mode replication that includes jump state info.
-	// Cannot use DOREPLIFETIME_ACTIVE_OVERRIDE(ACharacter, ReplicatedMovementMode, false) here because GET_MEMBER_NAME_CHECKED does not support 
+	// Cannot use DOREPLIFETIME_ACTIVE_OVERRIDE(ACharacter, ReplicatedMovementMode, false) here because GET_MEMBER_NAME_CHECKED does not support
 	// protected/private members.
 	{
 		static const FName ReplicatedMovementModePropertyName(TEXT("ReplicatedMovementMode"));
 		static UProperty* ReplicatedMovementModeProperty = GetReplicatedProperty(StaticClass(), ACharacter::StaticClass(), ReplicatedMovementModePropertyName);
-		ChangedPropertyTracker.SetCustomIsActiveOverride(ReplicatedMovementModeProperty->RepIndex, false);
+		ChangedPropertyTracker.SetCustomIsActiveOverride(this,ReplicatedMovementModeProperty->RepIndex, false);
 	}
 
 	// Workaround: RemoteViewPitch is taken from ReplicatedLook.Rotation.Pitch
@@ -528,7 +546,7 @@ bool AExtCharacter::GatherExtMovement()
 			ReplicatedExtMovement.Location = RootComponent->GetComponentLocation();
 			ReplicatedExtMovement.Rotation = RootComponent->GetComponentRotation();
 			ReplicatedExtMovement.Velocity = ExtCharacterMovement->Velocity;
-			ReplicatedExtMovement.Acceleration = ExtCharacterMovement->GetCurrentAcceleration().GetSafeNormal();			
+			ReplicatedExtMovement.Acceleration = ExtCharacterMovement->GetCurrentAcceleration().GetSafeNormal();
 			ReplicatedExtMovement.bIsPivotTurning = ExtCharacterMovement->IsPivotTurning();
 			ReplicatedExtMovement.TurnInPlaceTargetYaw = ExtCharacterMovement->GetTurnInPlaceTargetYaw();
 
@@ -648,7 +666,7 @@ void AExtCharacter::OnRep_IsPerformingGenericAction()
 
 #if WITH_EDITOR
 
-bool AExtCharacter::CanEditChange(const UProperty* InProperty) const
+bool AExtCharacter::CanEditChange(const FProperty* InProperty) const
 {
 	bool bCanChange = Super::CanEditChange(InProperty);
 
@@ -697,7 +715,7 @@ void AExtCharacter::PostEditChangeProperty(struct FPropertyChangedEvent& e)
 				UpdateDebugComponentsVisibility();
 	}
 
-	// Note: Any changes must be made before AActor::PostEditChangeChainProperty is called because components will be reset when UActorComponent reruns construction scripts 
+	// Note: Any changes must be made before AActor::PostEditChangeChainProperty is called because components will be reset when UActorComponent reruns construction scripts
 	Super::PostEditChangeProperty(e);
 }
 
@@ -794,7 +812,7 @@ void AExtCharacter::Tick(float DeltaTime)
 
 		if (USkeletalMeshComponent* MyMesh = GetMesh())
 		{
-			const UWorld* World = GetWorld();	
+			const UWorld* World = GetWorld();
 			const FTransform& RootBoneTransform = GetMesh()->GetBoneTransform(0);
 			const FVector RootBoneLocation = RootBoneTransform.GetLocation();
 			const FRotator RootBoneRotation = RootBoneTransform.Rotator();
@@ -814,7 +832,7 @@ void AExtCharacter::Tick(float DeltaTime)
 
 			const FVector Direction = GetActorForwardVector();
 			const float Aperture = ExtCharacterMovement->LookAngleThreshold;
-			DrawDebugCone(World, Location, Direction, 100.0f, FMath::DegreesToRadians(Aperture), 0.0f, Aperture / 5.f, FColor::Cyan, false, -1.0f, SDPG_Foreground);			
+			DrawDebugCone(World, Location, Direction, 100.0f, FMath::DegreesToRadians(Aperture), 0.0f, Aperture / 5.f, FColor::Cyan, false, -1.0f, SDPG_Foreground);
 		}
 	}
 #endif
@@ -1240,7 +1258,7 @@ void AExtCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 
 
 void AExtCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, EMovementMode CurrentMovementMode, uint8 PrevCustomMovementMode, uint8 CurrentCustomMovementMode)
 {
-	
+
 }
 
 void AExtCharacter::OnCrouchedChanged()
@@ -1803,7 +1821,7 @@ void AExtCharacter::OnStartRagdoll()
 		if (IsLanding())
 			CancelLanding();
 	}
-	
+
 	// Ragdolls don't rotate
 	ExtCharacterMovement->ResetTurnInPlaceState();
 	ExtCharacterMovement->ResetControllerDesireRotationState();
@@ -1884,7 +1902,7 @@ void AExtCharacter::SetGait(ECharacterGait NewGait)
 // 	{
 // 		return GetRootComponent()->GetComponentVelocity().GetSafeNormal();
 // 	}
-// 
+//
 // 	const UCharacterMovementComponent* CharacterMovement = GetCharacterMovement();
 // 	return CharacterMovement ? CharacterMovement->GetCurrentAcceleration() : FVector::ZeroVector;
 // }

@@ -4,7 +4,8 @@
 #include "AnimationRuntime.h"
 #include "Animation/AnimInstanceProxy.h"
 
-FAnimMode_OrientationWarping::FAnimMode_OrientationWarping()
+FAnimMode_OrientationWarping::FAnimMode_OrientationWarping():
+	LocomotionAngle(0.f)
 {
 }
 
